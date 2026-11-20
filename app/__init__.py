@@ -36,3 +36,13 @@ def create_app(config_object="config.Config", start_poller=True):
 
         threading.Thread(target=poll_pending_forever, args=(app,), daemon=True).start()
     return app
+
+
+def __getattr__(name):
+    # Lets `gunicorn app:app` (Render's default start command) work as well as `wsgi:app`.
+    if name == "app":
+        from wsgi import app
+
+        globals()["app"] = app
+        return app
+    raise AttributeError(name)
