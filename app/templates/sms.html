@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<h3 class="mb-3">SMS log</h3>
+<table class="table table-sm bg-white">
+  <thead><tr><th>Date</th><th>Client</th><th>Phone</th><th>Message</th><th>Status</th></tr></thead>
+  <tbody>{% for s in logs %}<tr><td><small>{{ s.created_at.strftime('%Y-%m-%d %H:%M') }}</small></td><td>{{ s.client.full_name if s.client else '' }}</td><td>{{ s.phone }}</td><td><small>{{ s.message }}</small></td><td><small>{{ s.status }}</small></td></tr>
+  {% else %}<tr><td colspan="5" class="text-muted">No SMS yet.</td></tr>{% endfor %}</tbody>
+</table>
+{% endblock %}

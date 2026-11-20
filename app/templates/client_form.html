@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block content %}
+<h3 class="mb-3">Register new client</h3>
+<p class="text-muted">A contract (Amasezerano y'imikoranire) is created automatically when you save.</p>
+<form method="post" class="card shadow-sm"><div class="card-body">
+  <h6 class="text-success">Contract type</h6>
+  <div class="mb-3">
+    {% for v, l in [('household','Household (Urugo)'), ('business','Business / Facility (Ikigo)')] %}
+    <div class="form-check form-check-inline">
+      <input class="form-check-input" type="radio" name="client_type" id="t_{{ v }}" value="{{ v }}" {{ 'checked' if form.get('client_type', 'household') == v }} onchange="toggleBiz()">
+      <label class="form-check-label" for="t_{{ v }}">{{ l }}</label>
+    </div>
+    {% endfor %}
+  </div>
+
+  <h6 class="text-success">Imyirondoro y'umukiriya (Client)</h6>
+  <div class="row g-2 mb-3">
+    <div class="col-md-6"><label class="form-label">Izina rya 1 / Name *</label><input name="first_name" class="form-control" value="{{ form.get('first_name','') }}" required></div>
+    <div class="col-md-6"><label class="form-label">Izina rya 2</label><input name="second_name" class="form-control" value="{{ form.get('second_name','') }}"></div>
+    <div class="col-md-6"><label class="form-label">Tel mobile (MoMo number) *</label><input name="phone" class="form-control" placeholder="078xxxxxxx" value="{{ form.get('phone','') }}" required></div>
+    <div class="col-md-6"><label class="form-label">E-mail</label><input name="email" type="email" class="form-control" value="{{ form.get('email','') }}"></div>
+  </div>
+
+  <h6 class="text-success">Aho atuye (Location)</h6>
+  <div class="row g-2 mb-3">
+    {% for n, l in [('district','Akarere'), ('sector','Umurenge'), ('cell','Akagari'), ('village','Umudugudu')] %}
+    <div class="col-6 col-md-3"><label class="form-label">{{ l }}</label><input name="{{ n }}" class="form-control" value="{{ form.get(n,'') }}"></div>
+    {% endfor %}
+  </div>
+
+  <h6 class="text-success">Iminsi yo gutwara ibishingwe (Collection days)</h6>
+  <div class="mb-2">
+    {% for v, l in weekdays %}
+    <div class="form-check form-check-inline"><input class="form-check-input" type="checkbox" name="collection_days" value="{{ v }}" id="d_{{ v }}"><label class="form-check-label" for="d_{{ v }}">{{ l }}</label></div>
+    {% endfor %}
+  </div>
+  <div class="row g-2 mb-3">
+    <div class="col-md-4"><label class="form-label">Inshuro dutwara mu kwezi</label><input name="pickups_per_month" type="number" min="0" class="form-control" value="{{ form.get('pickups_per_month','') }}"></div>
+  </div>
+
+  <h6 class="text-success">Igiciro (Pricing)</h6>
+  <div class="row g-2 mb-3">
+    <div class="col-md-4"><label class="form-label">Monthly fee (RWF) *</label><input name="monthly_fee" type="number" min="1" class="form-control" value="{{ form.get('monthly_fee','') }}" required></div>
+    <div class="col-md-8"><label class="form-label">Ingano y'ibitwarwa (volume)</label><input name="volume" class="form-control" placeholder="e.g. udufuka 2 twa kg 25" value="{{ form.get('volume','') }}"></div>
+    <div class="col-md-4"><label class="form-label">Amafaranga / 1 sache (RWF)</label><input name="bag_price" type="number" min="0" class="form-control" value="{{ form.get('bag_price','') }}"></div>
+    <div class="col-md-4"><label class="form-label">Kwishyura bitarenze taliki ya</label><input name="due_day" type="number" min="1" max="31" class="form-control" value="{{ form.get('due_day','10') }}"></div>
+    <div class="col-md-4"><label class="form-label">Contract start date</label><input name="start_date" type="date" class="form-control" value="{{ form.get('start_date', today.isoformat()) }}"></div>
+  </div>
+
+  <h6 class="text-success">Uburyo bwo kwishyura (Payment method)</h6>
+  <div class="row g-2 mb-3">
+    <div class="col-md-4"><select name="payment_method" class="form-select">
+      {% for v, l in [('momo','MoMo'), ('system','System'), ('bank','Bank'), ('cash','Cash')] %}<option value="{{ v }}">{{ l }}</option>{% endfor %}
+    </select></div>
+    <div class="col-md-4"><input name="momo_code" class="form-control" placeholder="MoMo code" value="{{ form.get('momo_code','') }}"></div>
+    <div class="col-md-4"><input name="bank_account" class="form-control" placeholder="Bank A/C number" value="{{ form.get('bank_account','') }}"></div>
+  </div>
+
+  <div class="row g-2 mb-3">
+    <div class="col-md-4"><label class="form-label">Ikimoteri (dump site)</label><input name="dump_site" class="form-control" value="{{ form.get('dump_site','') }}"></div>
+    <div class="col-md-4 biz"><label class="form-label">Duration (business)</label><input name="duration" class="form-control" placeholder="e.g. Umwaka 1" value="{{ form.get('duration','') }}"></div>
+    <div class="col-md-4 biz"><label class="form-label">End date (business)</label><input name="end_date" type="date" class="form-control" value="{{ form.get('end_date','') }}"></div>
+  </div>
+
+  {% if current_user.is_admin %}
+  <div class="row g-2 mb-3"><div class="col-md-4"><label class="form-label">Collector</label>
+    <select name="collector_id" class="form-select">{% for u in collectors %}<option value="{{ u.id }}">{{ u.name }} ({{ u.role }})</option>{% endfor %}</select>
+  </div></div>
+  {% endif %}
+
+  <button class="btn btn-success btn-lg">Save client &amp; create contract</button>
+</div></form>
+{% endblock %}
+{% block scripts %}
+<script>
+function toggleBiz(){const b=document.getElementById('t_business').checked;document.querySelectorAll('.biz').forEach(e=>e.style.display=b?'':'none');}
+toggleBiz();
+</script>
+{% endblock %}

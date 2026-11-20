@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3 class="mb-0">Clients</h3>
+  <a class="btn btn-success" href="{{ url_for('main.client_new') }}">+ Register client</a>
+</div>
+<form class="mb-3"><input class="form-control" name="q" value="{{ q }}" placeholder="Search by name, phone or client code"></form>
+<div class="table-responsive">
+<table class="table table-hover bg-white">
+  <thead><tr><th>Code</th><th>Name</th><th>Type</th><th>Phone</th><th>Location</th><th>Monthly fee</th><th>Balance (RWF)</th><th>Collector</th></tr></thead>
+  <tbody>
+  {% for c in clients %}
+    {% set k = c.contract %}
+    <tr onclick="location='{{ url_for('main.client_detail', client_id=c.id) }}'" style="cursor:pointer">
+      <td>{{ c.code }}</td><td>{{ c.full_name }}</td><td>{{ c.client_type|capitalize }}</td><td>{{ c.phone }}</td>
+      <td><small>{{ c.sector }} / {{ c.cell }} / {{ c.village }}</small></td>
+      <td>{{ k.monthly_fee|money if k else '' }}</td>
+      <td class="{{ 'text-danger' if k and k.balance > 0 else 'text-success' }}">{{ k.balance|money if k else '' }}</td>
+      <td><small>{{ c.collector.name if c.collector else '' }}</small></td>
+    </tr>
+  {% else %}
+    <tr><td colspan="8" class="text-muted">No clients found.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

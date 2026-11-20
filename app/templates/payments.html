@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<h3 class="mb-3">Payments</h3>
+<div class="btn-group mb-3">
+  {% for s in [None, 'SUCCESSFUL', 'PENDING', 'FAILED'] %}
+  <a class="btn btn-sm {{ 'btn-success' if status == s else 'btn-outline-success' }}" href="{{ url_for('main.payments', status=s) }}">{{ s or 'All' }}</a>
+  {% endfor %}
+</div>
+{% with rows=payments %}{% include "_payments_table.html" %}{% endwith %}
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<h3 class="mb-3">Dashboard</h3>
+<div class="row g-3 mb-4">
+  {% for label, value, cls in [('Clients', stats.clients, ''), ('Collected today (RWF)', stats.collected_today|money, 'text-success'), ('Collected this month (RWF)', stats.collected_month|money, 'text-success'), ('Outstanding (RWF)', stats.outstanding|money, 'text-danger'), ('Pending MoMo', stats.pending, 'text-warning')] %}
+  <div class="col-6 col-md"><div class="card shadow-sm"><div class="card-body"><div class="text-muted small">{{ label }}</div><div class="stat {{ cls }}">{{ value }}</div></div></div></div>
+  {% endfor %}
+</div>
+<div class="d-flex justify-content-between align-items-center mb-2">
+  <h5 class="mb-0">Recent payments</h5>
+  <a class="btn btn-success btn-sm" href="{{ url_for('main.client_new') }}">+ Register client</a>
+</div>
+{% with rows=recent %}{% include "_payments_table.html" %}{% endwith %}
+{% endblock %}

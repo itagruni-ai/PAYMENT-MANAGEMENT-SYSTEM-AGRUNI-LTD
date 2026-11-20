@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-start mb-3 gap-2">
+  <div>
+    <h3 class="mb-0">{{ client.full_name }}</h3>
+    <div class="text-muted">{{ client.code }} &middot; {{ client.client_type|capitalize }} &middot; {{ client.phone }}</div>
+    <div class="small text-muted">{{ client.district }} / {{ client.sector }} / {{ client.cell }} / {{ client.village }}</div>
+  </div>
+  {% if contract %}<a class="btn btn-outline-secondary" href="{{ url_for('main.contract_print', client_id=client.id) }}" target="_blank">View / print contract</a>{% endif %}
+</div>
+
+{% if contract %}
+<div class="row g-3 mb-3">
+  <div class="col-md-5">
+    <div class="card shadow-sm h-100"><div class="card-body">
+      <div class="text-muted small">Contract {{ contract.number }} ({{ contract.status }})</div>
+      <div class="row text-center mt-2">
+        <div class="col"><div class="small text-muted">Monthly</div><div class="fw-bold">{{ contract.monthly_fee|money }}</div></div>
+        <div class="col"><div class="small text-muted">Billed</div><div class="fw-bold">{{ contract.total_billed|money }}</div></div>
+        <div class="col"><div class="small text-muted">Paid</div><div class="fw-bold text-success">{{ contract.total_paid|money }}</div></div>
+      </div>
+      <hr>
+      <div class="text-center"><div class="small text-muted">Balance to pay (RWF)</div>
+        <div class="stat {{ 'text-danger' if contract.balance > 0 else 'text-success' }}" id="balance">{{ contract.balance|money }}</div></div>
+    </div></div>
+  </div>
+  <div class="col-md-7">
+    <div class="card shadow-sm h-100 border-success"><div class="card-body">
+      <h5 class="text-success">Pay with MTN MoMo</h5>
+      <form method="post" action="{{ url_for('main.client_pay', client_id=client.id) }}" onsubmit="this.querySelector('button').disabled=true">
+        <input type="hidden" name="method" value="momo">
+        <div class="row g-2">
+          <div class="col-sm-5"><label class="form-label small">Amount (RWF)</label><input name="amount" type="number" min="1" class="form-control form-control-lg" value="{{ contract.balance if contract.balance > 0 else contract.monthly_fee }}" required></div>
+          <div class="col-sm-7"><label class="form-label small">Client MoMo number</label><input name="phone" class="form-control form-control-lg" value="{{ client.phone }}" required></div>
+        </div>
+        <button class="btn btn-warning btn-lg w-100 mt-3 fw-bold">PAY</button>
+        <div class="form-text">The client gets a MoMo prompt on their phone and approves it with their PIN. When MTN confirms, an SMS is sent automatically.</div>
+      </form>
+      {% if current_user.is_admin %}
+      <details class="mt-2"><summary class="small">Record cash / bank payment</summary>
+        <form method="post" action="{{ url_for('main.client_pay', client_id=client.id) }}" class="row g-2 mt-1">
+          <div class="col-4"><input name="amount" type="number" min="1" class="form-control" placeholder="Amount" required></div>
+          <div class="col-3"><select name="method" class="form-select"><option value="cash">Cash</option><option value="bank">Bank</option></select></div>
+          <div class="col-5"><input name="note" class="form-control" placeholder="Note / receipt no."></div>
+          <div class="col-12"><button class="btn btn-outline-success btn-sm">Record payment</button></div>
+        </form>
+      </details>
+      {% endif %}
+    </div></div>
+  </div>
+</div>
+
+<h5>Payments</h5>
+{% with rows=contract.payments %}{% include "_payments_table.html" %}{% endwith %}
+
+<div class="row g-3">
+  <div class="col-md-5">
+    <h5>Monthly charges</h5>
+    <table class="table table-sm bg-white">
+      <thead><tr><th>Month</th><th>Amount (RWF)</th><th></th></tr></thead>
+      <tbody>{% for i in contract.invoices|reverse %}<tr><td>{{ i.period }}</td><td>{{ i.amount|money }}</td><td><small class="text-muted">{{ i.note or '' }}</small></td></tr>{% endfor %}</tbody>
+    </table>
+  </div>
+  <div class="col-md-7">
+    <h5>SMS sent</h5>
+    <table class="table table-sm bg-white">
+      <thead><tr><th>Date</th><th>Message</th><th>Status</th></tr></thead>
+      <tbody>{% for s in sms %}<tr><td><small>{{ s.created_at.strftime('%Y-%m-%d %H:%M') }}</small></td><td><small>{{ s.message }}</small></td><td><small>{{ s.status }}</small></td></tr>
+      {% else %}<tr><td colspan="3" class="text-muted">No SMS yet.</td></tr>{% endfor %}</tbody>
+    </table>
+  </div>
+</div>
+{% else %}
+<div class="alert alert-secondary">This client has no contract.</div>
+{% endif %}
+{% endblock %}
+{% block scripts %}
+{% if contract %}
+{% set pending = contract.payments|selectattr('status', 'equalto', 'PENDING')|list %}
+{% if pending %}
+<script>
+(function poll(){
+  fetch("{{ url_for('main.payment_status', payment_id=pending[0].id) }}").then(r=>r.json()).then(d=>{
+    if (d.status === 'PENDING') { setTimeout(poll, 3000); } else { location.reload(); }
+  }).catch(()=>setTimeout(poll, 5000));
+})();
+</script>
+{% endif %}
+{% endif %}
+{% endblock %}

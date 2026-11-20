@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="rw"><head><meta charset="utf-8"><title>Amasezerano {{ contract.number }}</title>
+<style>
+  body { font-family: Arial, sans-serif; font-size: 12px; max-width: 800px; margin: 20px auto; color: #000; }
+  h1 { text-align: center; font-size: 18px; margin: 10px 0; }
+  .box { border: 1px solid #1b6b3a; padding: 8px 10px; margin-bottom: 10px; border-radius: 4px; }
+  .box h3 { margin: 0 0 6px; font-size: 13px; color: #1b6b3a; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .head { display: flex; justify-content: space-between; }
+  .val { font-weight: bold; }
+  .article h4 { margin: 8px 0 2px; font-size: 12px; }
+  .article p { margin: 0; text-align: justify; }
+  .sign { display: flex; justify-content: space-between; margin-top: 30px; }
+  @media print { .noprint { display: none; } }
+</style></head>
+<body>
+<div class="noprint" style="text-align:right"><button onclick="window.print()">Print</button></div>
+<div class="head">
+  <div><b>AGRUNI Ltd</b><br>Phone 0788435111/0788308655<br>PO Box: 7037 Kigali, RWANDA<br>Siege social: KG770 ST, Gisozi, Kigali-Rwanda<br>E-mail: agruni@yahoo.fr &middot; www.agruni.net<br>Company Code: 102228763</div>
+  <div class="box"><h3>AMASEZERANO Y'IMIKORANIRE</h3>
+    Nº: <span class="val">{{ contract.number }}</span><br>
+    AKARERE: <span class="val">{{ client.district }}</span><br>UMURENGE: <span class="val">{{ client.sector }}</span><br>
+    AKAGARI: <span class="val">{{ client.cell }}</span><br>UMUDUGUDU: <span class="val">{{ client.village }}</span></div>
+</div>
+<h1>AMASEZERANO Y'IMIKORANIRE ({{ 'URUGO' if contract.contract_type == 'household' else 'IKIGO' }})</h1>
+<div class="grid">
+  <div class="box"><h3>IMYIRONDORO Y'UMUKIRIYA</h3>
+    IZINA RYA 1: <span class="val">{{ client.first_name }}</span><br>IZINA RYA 2: <span class="val">{{ client.second_name }}</span><br>
+    TEL MOBILE: <span class="val">{{ client.phone }}</span><br>E-MAIL: <span class="val">{{ client.email }}</span><br>
+    CODE Y'UMUKIRIYA: <span class="val">{{ client.code }}</span></div>
+  <div class="box"><h3>IMINSI YO GUTWARA IBISHINGWE</h3>
+    {% for v, l in weekdays %}{{ '☑' if v in contract.days_list else '☐' }} {{ l|upper }}<br>{% endfor %}
+    INSHURO DUTWARA MU KWEZI: <span class="val">{{ contract.pickups_per_month or '' }}</span></div>
+</div>
+<div class="box"><h3>GUHITAMO IBIJYANYE N'IGICIRO</h3>
+  INGANO Y'IBITWARWA: <span class="val">{{ contract.volume }}</span><br>
+  IBISHINGWE BIRENGA INGANO YAVUZWE HARUGURU: AGRUNI LTD IRABITWARA IKANABYISHYUZA.<br>
+  AMASASHE ASHYIRWAMO IBISHINGWE: AGRUNI LTD IYAZANA {{ 'MU RUGO' if contract.contract_type == 'household' else 'MU BIGO' }}. AMAFARANGA / 1 SACHE: <span class="val">{{ contract.bag_price|money if contract.bag_price else '' }}</span><br>
+  IGICIRO CYA BURI KWEZI: <span class="val">{{ contract.monthly_fee|money }} RWF</span>
+  {% if first_amount != contract.monthly_fee %}(UKWEZI KWA MBERE: <span class="val">{{ first_amount|money }} RWF</span>){% endif %}<br>
+  KWISHYURA BITARENZE TALIKI YA <span class="val">{{ contract.due_day }}</span> Z'UKWEZI. AMASEZERANO ATANGIRA KUWA <span class="val">{{ contract.start_date.strftime('%d/%m/%Y') }}</span>.</div>
+<div class="box"><h3>UBURYO BWO KWISHYURA</h3>
+  {{ '☑' if contract.payment_method == 'system' else '☐' }} KWISHYURA HAKORESHEJWE SYSTEM &nbsp;
+  {{ '☑' if contract.payment_method == 'bank' else '☐' }} KWISHYURA KURI BANK (A/C: <span class="val">{{ contract.bank_account }}</span>) &nbsp;
+  {{ '☑' if contract.payment_method == 'momo' else '☐' }} KWISHYURA UKORESHEJE MOMO: <span class="val">{{ contract.momo_code }}</span>
+  {% if contract.contract_type == 'business' %}&nbsp; {{ '☑' if contract.payment_method == 'cash' else '☐' }} KWISHYURA KASHI MU BIGO{% endif %}</div>
+
+<h3 style="text-align:center">IBISABWA MURI RUSANGE KU IGURISHWA RYA SERVICE YA AGRUNI LTD</h3>
+{% for a in articles %}<div class="article"><h4>{{ a.title }}</h4><p>{{ a.body }}</p></div>{% endfor %}
+
+<div class="sign">
+  <div><b>KURUHANDE RW'UMUKIRIYA</b><br>{{ client.full_name }}, KUWA {{ contract.start_date.strftime('%d/%m/%Y') }}<br><br>UMUKONO: ..................................</div>
+  <div><b>KURUHANDE RWA AGRUNI LTD</b><br>UMUYOBOZI MUKURU WA AGRUNI LTD<br>NDUWAYEZU JEAN Damascene<br><br>..................................</div>
+</div>
+<p style="margin-top:20px"><b>MUGIHE UGIZE IKIBAZO HAMAGARA KURI NUMERO ZIKURIKIRA: 0788435111 / 0788308655</b></p>
+</body></html>

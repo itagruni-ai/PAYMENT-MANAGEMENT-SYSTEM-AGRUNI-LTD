@@ -1,0 +1,22 @@
+<div class="table-responsive">
+<table class="table table-sm table-hover bg-white">
+  <thead><tr><th>#</th><th>Date</th><th>Client</th><th>Amount (RWF)</th><th>Method</th><th>Phone</th><th>Status</th><th>MTN Ref</th><th>By</th></tr></thead>
+  <tbody>
+  {% for p in rows %}
+    <tr>
+      <td>{{ p.id }}</td>
+      <td>{{ p.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+      <td><a href="{{ url_for('main.client_detail', client_id=p.contract.client_id) }}">{{ p.contract.client.full_name }}</a><br><small class="text-muted">{{ p.contract.client.code }}</small></td>
+      <td>{{ p.amount|money }}</td>
+      <td>{{ p.method }}</td>
+      <td>{{ p.phone }}</td>
+      <td><span class="badge badge-{{ p.status }}">{{ p.status }}</span>{% if p.reason and p.status == 'FAILED' %}<br><small class="text-danger">{{ p.reason }}</small>{% endif %}</td>
+      <td><small>{{ p.financial_transaction_id or '' }}</small></td>
+      <td><small>{{ p.initiated_by.name if p.initiated_by else '' }}</small></td>
+    </tr>
+  {% else %}
+    <tr><td colspan="9" class="text-muted">No payments yet.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>

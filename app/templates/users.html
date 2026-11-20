@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<h3 class="mb-3">Users (collectors &amp; admins)</h3>
+<form method="post" class="card card-body shadow-sm mb-3"><div class="row g-2">
+  <div class="col-md-3"><input name="name" class="form-control" placeholder="Full name" required></div>
+  <div class="col-md-2"><input name="username" class="form-control" placeholder="Username" required></div>
+  <div class="col-md-2"><input name="phone" class="form-control" placeholder="Phone"></div>
+  <div class="col-md-2"><input name="password" type="password" class="form-control" placeholder="Password" required></div>
+  <div class="col-md-2"><select name="role" class="form-select"><option value="collector">Collector</option><option value="admin">Admin</option></select></div>
+  <div class="col-md-1"><button class="btn btn-success w-100">Add</button></div>
+</div></form>
+<table class="table bg-white">
+  <thead><tr><th>Name</th><th>Username</th><th>Phone</th><th>Role</th><th>Status</th><th></th></tr></thead>
+  <tbody>{% for u in users %}<tr><td>{{ u.name }}</td><td>{{ u.username }}</td><td>{{ u.phone or '' }}</td><td>{{ u.role }}</td><td>{{ 'Active' if u.active else 'Disabled' }}</td>
+  <td>{% if u.id != current_user.id %}<form method="post" action="{{ url_for('main.user_toggle', user_id=u.id) }}"><button class="btn btn-sm btn-outline-secondary">{{ 'Disable' if u.active else 'Enable' }}</button></form>{% endif %}</td></tr>{% endfor %}</tbody>
+</table>
+{% endblock %}
