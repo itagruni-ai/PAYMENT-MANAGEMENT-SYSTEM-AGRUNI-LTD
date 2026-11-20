@@ -7,6 +7,7 @@ class Config:
     SQLALCHEMY_DATABASE_URI = re.sub(
         r"^postgres(ql)?://", "postgresql+psycopg2://", os.environ.get("DATABASE_URL", "sqlite:///agruni.db")
     )
+    SQLALCHEMY_ENGINE_OPTIONS = {"pool_pre_ping": True, "pool_recycle": 280}
     PUBLIC_BASE_URL = os.environ.get("PUBLIC_BASE_URL", "")
 
     COMPANY_NAME = "AGRUNI Ltd"

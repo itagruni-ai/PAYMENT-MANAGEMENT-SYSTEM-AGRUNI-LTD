@@ -25,6 +25,9 @@ def start_momo_payment(contract, amount, phone, user):
     db.session.add(payment)
     db.session.flush()
     payment.external_id = f"PAY{payment.id:08d}"
+    # Commit before calling MTN so no DB transaction is held open during the HTTP call
+    # and the payment exists when MTN's callback arrives.
+    db.session.commit()
     callback = None
     base = current_app.config.get("PUBLIC_BASE_URL")
     if base:
