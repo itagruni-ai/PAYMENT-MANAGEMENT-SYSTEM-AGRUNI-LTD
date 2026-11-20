@@ -85,3 +85,8 @@ def test_collector_sees_only_own_clients(client):
     client.get("/logout")
     client.post("/login", data={"username": "jean", "password": "pw"})
     assert client.get(f"/clients/{k.client_id}").status_code == 403
+
+
+def test_momo_safe_text():
+    from app.momo import safe_text
+    assert safe_text("AGRUNI w'isuku 00001/AGRUNI/2026 <x>") == "AGRUNI wisuku 00001/AGRUNI/2026 x"

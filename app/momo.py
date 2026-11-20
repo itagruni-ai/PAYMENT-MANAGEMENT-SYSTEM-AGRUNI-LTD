@@ -1,5 +1,6 @@
 """MTN MoMo Collections API client (Request to Pay)."""
 import base64
+import re
 import threading
 import time
 import uuid
@@ -16,6 +17,11 @@ _mock_requests = {}
 
 class MomoError(Exception):
     pass
+
+
+def safe_text(text):
+    """MTN's gateway firewall rejects requests containing quotes and other symbols."""
+    return re.sub(r"[^A-Za-z0-9 /._-]", "", text or "")[:160]
 
 
 def _cfg(key):
@@ -70,8 +76,8 @@ def request_to_pay(amount, phone, external_id, payer_message, payee_note, callba
         "currency": _cfg("MOMO_CURRENCY"),
         "externalId": str(external_id),
         "payer": {"partyIdType": "MSISDN", "partyId": msisdn},
-        "payerMessage": payer_message[:160],
-        "payeeNote": payee_note[:160],
+        "payerMessage": safe_text(payer_message),
+        "payeeNote": safe_text(payee_note),
     }
     r = requests.post(
         f"{_cfg('MOMO_BASE_URL')}/collection/v1_0/requesttopay", json=body, headers=headers, timeout=30

@@ -34,7 +34,7 @@ def start_momo_payment(contract, amount, phone, user):
             amount=amount,
             phone=payment.phone,
             external_id=payment.external_id,
-            payer_message=f"AGRUNI umusanzu w'isuku {client.code}",
+            payer_message=f"AGRUNI umusanzu wisuku {client.code}",
             payee_note=f"{client.full_name} {client.code}",
             callback_url=callback,
         )
