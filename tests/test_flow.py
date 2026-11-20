@@ -90,3 +90,25 @@ def test_collector_sees_only_own_clients(client):
 def test_momo_safe_text():
     from app.momo import safe_text
     assert safe_text("AGRUNI w'isuku 00001/AGRUNI/2026 <x>") == "AGRUNI wisuku 00001/AGRUNI/2026 x"
+
+
+def test_pindo_sms(client, monkeypatch):
+    import app.sms as sms
+    from flask import current_app
+    sent = {}
+
+    class R:
+        ok = True
+        status_code = 201
+        text = '{"sms_id": 1}'
+
+    def fake_post(url, json=None, headers=None, timeout=None):
+        sent.update(url=url, json=json, headers=headers)
+        return R()
+
+    monkeypatch.setattr(sms.requests, "post", fake_post)
+    current_app.config.update(SMS_MODE="pindo", PINDO_API_TOKEN="tok", PINDO_SENDER="PindoTest")
+    log = sms.send_sms("250788123456", "hello")
+    assert log.status == "SENT"
+    assert sent["json"] == {"to": "+250788123456", "text": "hello", "sender": "PindoTest"}
+    assert sent["headers"]["Authorization"] == "Bearer tok"

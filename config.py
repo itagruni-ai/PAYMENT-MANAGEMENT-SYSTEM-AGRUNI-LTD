@@ -3,7 +3,9 @@ import os
 
 class Config:
     SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-change-me")
-    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL", "sqlite:///agruni.db")
+    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL", "sqlite:///agruni.db").replace(
+        "postgres://", "postgresql://", 1
+    )
     PUBLIC_BASE_URL = os.environ.get("PUBLIC_BASE_URL", "")
 
     COMPANY_NAME = "AGRUNI Ltd"
@@ -23,6 +25,8 @@ class Config:
     AT_USERNAME = os.environ.get("AT_USERNAME", "sandbox")
     AT_API_KEY = os.environ.get("AT_API_KEY", "")
     AT_SENDER_ID = os.environ.get("AT_SENDER_ID", "")
+    PINDO_API_TOKEN = os.environ.get("PINDO_API_TOKEN", "")
+    PINDO_SENDER = os.environ.get("PINDO_SENDER", "PindoTest")
     SMS_TEMPLATE = os.environ.get(
         "SMS_TEMPLATE",
         "AGRUNI Ltd: Murakoze {name} kwishyura umusanzu w'isuku. "

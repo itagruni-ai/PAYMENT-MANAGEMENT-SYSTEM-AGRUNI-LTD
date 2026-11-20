@@ -30,9 +30,11 @@ Monthly billing also happens automatically when a client is viewed; to bill ever
 
 `MOMO_MODE=mock` simulates approval after ~6 seconds (numbers ending in `000` are rejected).
 
-## SMS (Africa's Talking)
+## SMS
 
-`SMS_MODE=sandbox|production`, `AT_USERNAME`, `AT_API_KEY`, optional `AT_SENDER_ID`. Message wording: `SMS_TEMPLATE` in `config.py` (placeholders `{name} {paid} {balance} {code} {ref}`).
+Pindo (Rwanda): `SMS_MODE=pindo`, `PINDO_API_TOKEN`, `PINDO_SENDER` (default `PindoTest`; request an `AGRUNI` sender ID from Pindo).
+
+Africa's Talking: `SMS_MODE=sandbox|production`, `AT_USERNAME`, `AT_API_KEY`, optional `AT_SENDER_ID`. Message wording: `SMS_TEMPLATE` in `config.py` (placeholders `{name} {paid} {balance} {code} {ref}`).
 
 ## Tests
 
