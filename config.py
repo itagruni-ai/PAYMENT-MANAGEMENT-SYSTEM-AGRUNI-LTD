@@ -1,10 +1,11 @@
 import os
+import re
 
 
 class Config:
     SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-change-me")
-    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL", "sqlite:///agruni.db").replace(
-        "postgres://", "postgresql://", 1
+    SQLALCHEMY_DATABASE_URI = re.sub(
+        r"^postgres(ql)?://", "postgresql+psycopg2://", os.environ.get("DATABASE_URL", "sqlite:///agruni.db")
     )
     PUBLIC_BASE_URL = os.environ.get("PUBLIC_BASE_URL", "")
 
