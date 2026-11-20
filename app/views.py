@@ -1,9 +1,12 @@
+import csv
+import io
 import json
 import os
+import zipfile
 from datetime import date, datetime
 from functools import wraps
 
-from flask import Blueprint, abort, flash, jsonify, redirect, render_template, request, url_for
+from flask import Blueprint, Response, abort, flash, jsonify, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 
 from . import db
@@ -279,6 +282,26 @@ def payments():
 @admin_required
 def sms_log():
     return render_template("sms.html", logs=SmsLog.query.order_by(SmsLog.id.desc()).limit(500).all())
+
+
+@bp.route("/backup")
+@admin_required
+def backup():
+    """Download every table as CSV files (Excel-friendly) in one zip."""
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+        for table in db.metadata.sorted_tables:
+            cols = [c.name for c in table.columns if c.name != "password_hash"]
+            out = io.StringIO()
+            w = csv.writer(out)
+            w.writerow(cols)
+            for row in db.session.execute(table.select().order_by(*table.primary_key.columns)).mappings():
+                w.writerow([row[c] for c in cols])
+            zf.writestr(f"{table.name}.csv", "\ufeff" + out.getvalue())
+    name = f"agruni-backup-{datetime.now():%Y-%m-%d-%H%M}.zip"
+    return Response(
+        buf.getvalue(), mimetype="application/zip", headers={"Content-Disposition": f"attachment; filename={name}"}
+    )
 
 
 @bp.route("/users", methods=["GET", "POST"])

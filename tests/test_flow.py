@@ -112,3 +112,19 @@ def test_pindo_sms(client, monkeypatch):
     assert log.status == "SENT"
     assert sent["json"] == {"to": "+250788123456", "text": "hello", "sender": "PindoTest"}
     assert sent["headers"]["Authorization"] == "Bearer tok"
+
+
+def test_backup_download(client):
+    import io
+    import zipfile
+
+    register(client)
+    r = client.get("/backup")
+    assert r.status_code == 200 and r.mimetype == "application/zip"
+    zf = zipfile.ZipFile(io.BytesIO(r.data))
+    assert {"user.csv", "client.csv", "contract.csv", "invoice.csv", "payment.csv", "sms_log.csv"} == set(zf.namelist())
+    assert "password_hash" not in zf.read("user.csv").decode()
+    client.post("/users", data={"name": "Jean", "username": "jean", "password": "pw", "role": "collector"})
+    client.get("/logout")
+    client.post("/login", data={"username": "jean", "password": "pw"})
+    assert client.get("/backup").status_code == 403
